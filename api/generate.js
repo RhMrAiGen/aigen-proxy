@@ -1,36 +1,37 @@
-export default async function handler(req, res) {
-  // 1. TAMPAL API KEY RUNWARE KAU KAT SINI
-  const MY_KEY = "ERekFEky4sKbRvJFzgqRC8q3kT45z2iP"; 
+export default async function (req, res) {
+  // 1. TAMPAL API KEY RUNWARE KAU DI SINI
+  const apiKey = "ERekFEky4sKbRvJFzgqRC8q3kT45z2iP";
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Guna POST bos' });
   }
 
+  const payload = [
+    {
+      "action": "imageInference",
+      "apiKey": apiKey,
+      "prompt": req.body.prompt || "A sunny day",
+      "modelId": "runware:100@1"
+    }
+  ];
+
   try {
     const response = await fetch('https://api.runware.ai/v1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify([
-        {
-          "action": "imageInference",
-          "apiKey": MY_KEY,
-          "prompt": req.body.prompt || "A cute cat",
-          "modelId": "runware:100@1"
-        }
-      ])
+      body: JSON.stringify(payload)
     });
 
-    // Cek kalau Runware respon tapi ada masalah (contoh: baki tak cukup)
-    const data = await response.json();
+    const result = await response.json();
     
-    // Kita hantar apa saja hasil dari Runware terus ke fon kau
-    return res.status(200).json(data);
+    // Hantar terus hasil Runware ke telefon
+    return res.status(200).json(result);
 
-  } catch (error) {
-    // Kalau Vercel crash, dia akan beritahu SEBABNYA kat fon kau
+  } catch (err) {
+    // Kalau ada error, kita hantar mesej yang boleh dibaca
     return res.status(200).json({ 
-      error: "Vercel Sangkut", 
-      message: error.message 
+      status: "Error tapi Vercel hidup",
+      info: err.message 
     });
   }
 }
