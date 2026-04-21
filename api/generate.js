@@ -1,32 +1,36 @@
 export default async function handler(req, res) {
-  // Ganti KUNCI_ASLI_KAU dengan kod panjang dari dashboard Runware
+  console.log("LOG: Handler bermula..."); // Akan muncul kat log
   const MY_REAL_KEY = "KUNCI_ASLI_KAU_DI_SINI"; 
 
-  if (req.method === 'POST') {
-    try {
-      const response = await fetch('https://api.runware.ai/v1', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify([
-          {
-            "action": "imageInference",
-            "apiKey": MY_REAL_KEY,
-            "prompt": req.body.prompt || "A cute cat",
-            "modelId": "runware:100@1"
-          }
-        ])
-      });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Mesti guna POST bos' });
+  }
 
-      const data = await response.json();
-      
-      // Kita hantar apa saja jawapan dari Runware terus ke fon kau
-      return res.status(200).json(data);
-      
-    } catch (error) {
-      // Kalau Vercel sendiri yang crash, dia akan beritahu kenapa
-      return res.status(500).json({ error: 'Vercel Crash!', details: error.message });
-    }
-  } else {
-    res.status(405).json({ message: 'Guna POST saja bos' });
+  try {
+    console.log("LOG: Mencuba hantar ke Runware...");
+    
+    const response = await fetch('https://api.runware.ai/v1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify([
+        {
+          "action": "imageInference",
+          "apiKey": MY_REAL_KEY,
+          "prompt": req.body.prompt || "A sunny beach",
+          "modelId": "runware:100@1"
+        }
+      ])
+    });
+
+    console.log("LOG: Respon diterima dari Runware");
+    const data = await response.json();
+    return res.status(200).json(data);
+
+  } catch (error) {
+    console.log("LOG: CRASH!", error.message);
+    return res.status(500).json({ 
+      error: 'Crash kat Vercel bos!', 
+      message: error.message 
+    });
   }
 }
