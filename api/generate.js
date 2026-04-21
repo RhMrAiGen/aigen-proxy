@@ -1,29 +1,20 @@
 export default async function handler(req, res) {
-  // 1. Ambil kunci rahsia dari Settings Vercel
+  // Ambil key dari Vercel
   const apiKey = process.env.RUNWARE_API_KEY;
 
-  // Cek kalau kunci tak wujud
   if (!apiKey) {
-    return res.status(200).json({ 
-      error: "Konfigurasi", 
-      message: "Kunci RUNWARE_API_KEY tiada dalam Settings Vercel!" 
-    });
+    return res.status(200).json({ error: "Key Tiada", message: "Cek Settings Vercel bos!" });
   }
 
-  if (req.method !== 'POST') return res.status(405).send("Guna POST bos");
+  // Benarkan request masuk
+  if (req.method !== 'POST') return res.status(405).send("Guna POST");
 
   try {
-    // 2. Cara selamat baca data dari fon (Fix TypeError: invalid parameter)
-    let body;
-    try {
-      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    } catch (e) {
-      body = req.body;
-    }
+    // Ambil prompt dari fon
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const userPrompt = body?.prompt || "A high quality image";
 
-    const userPrompt = body?.prompt || "A high quality car";
-
-    // 3. Ketuk pintu Runware
+    // Request ke Runware
     const response = await fetch('https://api.runware.ai/v1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -39,14 +30,17 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Hantar jawapan Runware ke telefon
+    // Kalau Runware bagi 401, kita hantar mesej ni supaya kau tahu key tu problem
+    if (data.error || (data[0] && data[0].error)) {
+       return res.status(200).json({ 
+         status: "Runware Tolak", 
+         info: "Key mungkin salah atau tak aktif lagi." 
+       });
+    }
+
     return res.status(200).json(data);
 
   } catch (error) {
-    // Jika Vercel sendiri yang bermasalah
-    return res.status(200).json({ 
-      error: "Vercel Crash", 
-      message: error.message 
-    });
+    return res.status(200).json({ error: "Sangkut", message: error.message });
   }
 }
