@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   // 1. TAMPAL API KEY RUNWARE KAU KAT SINI
-  const MY_KEY = "TAMPAL_API_KEY_ASLI_KAU_DI_SINI"; 
+  const MY_KEY = "ERekFEky4sKbRvJFzgqRC8q3kT45z2iP"; 
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Guna POST bos' });
