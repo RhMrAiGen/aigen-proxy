@@ -1,6 +1,6 @@
 export default async function (req, res) {
   // 1. MASUKKAN KEY ASLI KAU KAT SINI
-  const MY_REAL_KEY = "KUNCI_ASLI_KAU_DI_SINI"; 
+  const MY_REAL_KEY = "ERekFEky4sKbRvJFzgqRC8q3kT45z2iP"; 
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Guna POST bos' });
