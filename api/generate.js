@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const MY_KEY = "ERekFEky4sKbRvJFzgqRC8q3kT45z2iP"; 
+  const MY_KEY = process.env.RUNWARE_API_KEY;
 
   if (req.method !== 'POST') return res.status(405).json({ error: 'Guna POST' });
 
