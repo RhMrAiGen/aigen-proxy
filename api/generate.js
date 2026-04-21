@@ -26,6 +26,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Runware Error bos!' });
     }
   } else {
-    res.status(405).json({ message: 'Guna POST saja!' });
+    res.status(405).json({ message: 'error server connection!' });
   }
 }
