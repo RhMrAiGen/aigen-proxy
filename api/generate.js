@@ -1,18 +1,37 @@
 export default async function handler(req, res) {
-  // PAKSA MASUKKAN KUNCI KAT SINI. JANGAN PAKAI process.env DULU.
-  const MY_REAL_KEY = "ERekFEky4sKbRvJFzgqRC8q3kT45z2iP"; 
+  // 1. Ambil kunci rahsia dari Settings Vercel
+  const apiKey = process.env.RUNWARE_API_KEY;
 
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Guna POST bos' });
+  // Cek kalau kunci tak wujud
+  if (!apiKey) {
+    return res.status(200).json({ 
+      error: "Konfigurasi", 
+      message: "Kunci RUNWARE_API_KEY tiada dalam Settings Vercel!" 
+    });
+  }
+
+  if (req.method !== 'POST') return res.status(405).send("Guna POST bos");
 
   try {
+    // 2. Cara selamat baca data dari fon (Fix TypeError: invalid parameter)
+    let body;
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    } catch (e) {
+      body = req.body;
+    }
+
+    const userPrompt = body?.prompt || "A high quality car";
+
+    // 3. Ketuk pintu Runware
     const response = await fetch('https://api.runware.ai/v1', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify([
         {
           "action": "imageInference",
-          "apiKey": MY_REAL_KEY,
-          "prompt": req.body.prompt || "A high quality car",
+          "apiKey": apiKey,
+          "prompt": userPrompt,
           "modelId": "runware:100@1"
         }
       ])
@@ -20,11 +39,14 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Kita hantar apa saja jawapan Runware bagi.
-    // Kalau dia masih 401, maksudnya API Key tu memang bermasalah dari pihak Runware.
+    // Hantar jawapan Runware ke telefon
     return res.status(200).json(data);
 
   } catch (error) {
-    return res.status(200).json({ error: "Sangkut", message: error.message });
+    // Jika Vercel sendiri yang bermasalah
+    return res.status(200).json({ 
+      error: "Vercel Crash", 
+      message: error.message 
+    });
   }
 }
