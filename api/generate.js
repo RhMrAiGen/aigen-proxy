@@ -1,20 +1,19 @@
 export default async function handler(req, res) {
-  const RUNWARE_API_KEY = process.env.RUNWARE_API_KEY;
+  // Kita letak terus kunci kat sini supaya Vercel tak pening cari
+  const MY_REAL_KEY = "ERekFEky4sKbRvJFzgqRC8q3kT45z2iP"; 
 
   if (req.method === 'POST') {
     try {
-      // Kita cuba generate GAMBAR dulu untuk test connection
       const response = await fetch('https://api.runware.ai/v1', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify([
           {
             "action": "imageInference",
-            "apiKey": RUNWARE_API_KEY,
-            "prompt": req.body.prompt,
-            "modelId": "runware:100@1", // Model standard Runware
-            "numberResults": 1,
-            "outputFormat": "JPG"
+            "apiKey": MY_REAL_KEY,
+            "prompt": req.body.prompt || "A cute cat",
+            "modelId": "runware:100@1",
+            "numberResults": 1
           }
         ])
       });
@@ -23,9 +22,9 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
       
     } catch (error) {
-      return res.status(500).json({ error: 'Crash di Vercel!', details: error.message });
+      return res.status(500).json({ error: 'Crash!', details: error.message });
     }
   } else {
-    res.status(405).json({ message: 'Hanya POST dibenarkan' });
+    res.status(405).json({ message: 'Guna POST bos' });
   }
 }
