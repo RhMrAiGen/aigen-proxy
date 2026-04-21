@@ -3,29 +3,34 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      // Runware biasanya guna format JSON untuk bagitahu model apa nak guna
+      // Kita hantar format yang paling simple & direct
       const response = await fetch('https://api.runware.ai/v1', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify([
-          {
-            "action": "generateVideo",
-            "apiKey": RUNWARE_API_KEY,
-            "prompt": req.body.prompt, // Ini ambil dari button app kau
-            "modelId": "runware:1@flux", // Contoh model, kau boleh tukar ikut docs mereka
-            "steps": 25
-          }
-        ])
+        body: JSON.stringify({
+          "action": "generateVideo",
+          "apiKey": RUNWARE_API_KEY,
+          "prompt": req.body.prompt,
+          "modelId": "runware:1@flux", // Guna model standard
+          "steps": 10 // Rendahkan steps supaya baki $0.05 kau cukup
+        })
       });
 
       const data = await response.json();
+      
+      // Kalau Runware bagi error dalam JSON dia
+      if (data.error) {
+        return res.status(400).json(data);
+      }
+
       return res.status(200).json(data);
+      
     } catch (error) {
-      return res.status(500).json({ error: 'Runware Error bos!' });
+      return res.status(500).json({ error: 'Server Error bos!', details: error.message });
     }
   } else {
-    res.status(405).json({ message: 'error server connection!!' });
+    res.status(405).json({ message: 'Hanya POST dibenarkan' });
   }
 }
